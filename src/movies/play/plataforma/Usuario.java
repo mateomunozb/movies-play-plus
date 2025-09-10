@@ -1,6 +1,6 @@
 package movies.play.plataforma;
 
-import movies.play.contenido.Pelicula;
+import movies.play.contenido.Contenido;
 
 import java.time.LocalDateTime;
 
@@ -15,9 +15,9 @@ public class Usuario {
         this.fechaRegistro = LocalDateTime.now();
     }
 
-    public void ver(Pelicula pelicula) {
+    public void ver(Contenido contenido) {
         System.out.println(nombre + " esta viendo...");
-        pelicula.reproducir();
+        contenido.reproducir();
     }
 
     public String getNombre() {

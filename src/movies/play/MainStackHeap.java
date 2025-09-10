@@ -1,7 +1,5 @@
 package movies.play;
 
-import movies.play.contenido.Pelicula;
-
 public class MainStackHeap {
     public static void main(String[] args) {
 //        Pelicula reyLeon = new Pelicula("El rey león", 135, "Animada");

@@ -1,6 +1,8 @@
 package movies.play.util;
 
+import movies.play.contenido.Documental;
 import movies.play.contenido.Genero;
+import movies.play.contenido.Contenido;
 import movies.play.contenido.Pelicula;
 
 import java.io.IOException;
@@ -16,7 +18,7 @@ public class FileUtils {
     public static final String NOMBRE_ARCHIVO = "contenido.txt";
     public static final String SEPARADOR = "|";
 
-    public static void escribirContenido(Pelicula contenido) {
+    public static void escribirContenido(Contenido contenido) {
         String linea = String.join(SEPARADOR,
                 contenido.getTitulo(),
                 String.valueOf(contenido.getDuracion()),
@@ -25,9 +27,17 @@ public class FileUtils {
                 contenido.getFechaEstreno().toString()
         );
 
+        String lineaFinal;
+
+        if (contenido instanceof Documental documental) {
+            lineaFinal = "DOCUMENTAL" + SEPARADOR + linea + SEPARADOR + documental.getNarrador();
+        } else {
+            lineaFinal = "PELICULA" + SEPARADOR +   linea;
+        }
+
         try {
             Files.writeString(Paths.get(NOMBRE_ARCHIVO),
-                    linea + System.lineSeparator(),
+                    lineaFinal + System.lineSeparator(),
                     StandardOpenOption.CREATE,
                     StandardOpenOption.APPEND
             );
@@ -38,24 +48,34 @@ public class FileUtils {
 
     }
 
-    public static List<Pelicula> leerContenido() {
-        List<Pelicula> contenidoDesdeArchivo = new ArrayList<>();
+    public static List<Contenido> leerContenido() {
+        List<Contenido> contenidoDesdeArchivo = new ArrayList<>();
         try {
             List<String> lineas = Files.readAllLines(Paths.get(NOMBRE_ARCHIVO));
 
             lineas.forEach(linea -> {
                 String[] datos = linea.split("\\" + SEPARADOR);
-                if (datos.length == 5) {
-                    String titulo = datos[0];
-                    int duracion = Integer.parseInt(datos[1]);
-                    Genero genero = Genero.valueOf(datos[2].toUpperCase());
-                    double calificacion = datos[3].isBlank() ? 0 : Double.parseDouble(datos[3]);
-                    LocalDate fechaEstreno = LocalDate.parse(datos[4]);
 
-                    Pelicula pelicula = new Pelicula(titulo, duracion, genero, calificacion);
-                    pelicula.setFechaEstreno(fechaEstreno);
+                String tipoContenido = datos[0];
 
-                    contenidoDesdeArchivo.add(pelicula);
+                if (("PELICULA".equals(tipoContenido) && datos.length == 6) || ("DOCUMENTAL".equals(tipoContenido) && datos.length == 7)) {
+                    String titulo = datos[1];
+                    int duracion = Integer.parseInt(datos[2]);
+                    Genero genero = Genero.valueOf(datos[3].toUpperCase());
+                    double calificacion = datos[4].isBlank() ? 0 : Double.parseDouble(datos[4]);
+                    LocalDate fechaEstreno = LocalDate.parse(datos[5]);
+
+                    Contenido contenido;
+
+                    if ("PELICULA".equals(tipoContenido)) {
+                        contenido = new Pelicula(titulo, duracion, genero, calificacion);
+                    } else {
+                        String narrador = datos[6];
+                        contenido = new Documental(titulo, duracion, genero, calificacion, narrador);
+                    }
+
+                    contenido.setFechaEstreno(fechaEstreno);
+                    contenidoDesdeArchivo.add(contenido);
                 }
             });
         } catch (IOException e) {
